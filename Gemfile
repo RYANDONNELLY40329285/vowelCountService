@@ -3,6 +3,9 @@ source "https://rubygems.org"
 gem "sinatra"
 gem "json"
 gem "rack-protection"
+gem "puma"        
+gem "rackup"      
+
 
 group :development, :test do
   gem "rspec"
