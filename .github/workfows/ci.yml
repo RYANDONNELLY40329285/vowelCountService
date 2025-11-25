@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Run tests with coverage
+        run: bundle exec ruby src/test.rb
+
+      - name: Start Sinatra app
+        run: |
+          ruby src/vowelCount.rb &
+          echo $! > app.pid
+          sleep 5
+
+      - name: Health check endpoint
+        run: curl --fail "http://127.0.0.1:4567/health"
+
+      - name: Stop Sinatra app
+        if: always()
+        run: |
+          kill "$(cat app.pid)" || true
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage
